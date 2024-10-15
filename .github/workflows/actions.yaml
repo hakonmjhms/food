@@ -1,12 +1,8 @@
 name: Send Menu to Teams
 
 on:
-  # Add cron to trigger every day at 9:00 AM (change as needed)
   schedule:
-    - cron: "0 9 * * *"
-  push:
-    branches:
-      - main
+    - cron: "0 8 * * 1-5"
   workflow_dispatch:
 
 jobs:
