@@ -1,0 +1,35 @@
+name: Send Menu to Teams
+
+on:
+  #add cron
+  push:
+    branches:
+      main
+
+jobs:
+  send-menu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 PyPDF2  # Add your other dependencies here
+
+      - name: Run Python Script and Capture Output
+        id: run_script
+        run: |
+          python your_script.py | tee output.txt  # Replace 'your_script.py' with the name of your script
+
+      - name: Post Message to Teams
+        if: success()  # Only run this step if the previous steps were successful
+        run: |
+          curl -H "Content-Type: application/json" -d "{\"text\":\"$(cat output.txt)\"}" ${{ secrets.TEAMS_WEBHOOK_URL }}  # Replace with your webhook URL
