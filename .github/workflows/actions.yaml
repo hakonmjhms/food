@@ -35,8 +35,7 @@ jobs:
         run: |
           JSON_DATA=$(cat output.txt | jq -R .)
 
-          request_body=$(< <(cat <<EOF
-          {
+          request_body="{
             "type": "message",
             "attachments": [
               {
@@ -55,8 +54,6 @@ jobs:
                 }
               }
             ]
-          }
-          EOF
-          ))
+          }"
 
           curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" -H "Content-Type: application/json" -d '$request_body'
