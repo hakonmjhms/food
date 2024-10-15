@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.8'
+          python-version: "3.8"
 
       - name: Install Dependencies
         run: |
@@ -28,9 +28,9 @@ jobs:
       - name: Run Python Script and Capture Output
         id: run_script
         run: |
-          python your_script.py | tee output.txt
+          python scripts/scrape_and_extract.py | tee output.txt
 
       - name: Post Message to Teams
         if: success()
         run: |
-          curl -H 'Content-Type: application/json' -d '{\'text\':\'Hello from GitHub Actions!\'}' ${{ secrets.TEAMS_WEBHOOK_URL }}
+          curl -H "Content-Type: application/json" -d "{\"text\":\"Hello from GitHub Actions!\"}" ${{ secrets.TEAMS_WEBHOOK_URL }}
