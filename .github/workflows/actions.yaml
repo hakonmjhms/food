@@ -39,9 +39,9 @@ jobs:
             OUTPUT: ${{needs.send-menu.outputs.food}}
           run: |
             json_data=$(cat output.txt | jq -R .)
-            echo "{\"text\": ${json_data}}"
-            echo "{\"text\": \"Placeholder\"}"
-            echo ""
+
+            echo "$OUTPUT"
+
             curl -H "Content-Type: application/json" -d "{\"text\": \"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
             curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
