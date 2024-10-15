@@ -35,4 +35,4 @@ jobs:
         run: |
           json_data=$(cat output.txt | jq -R .)
           echo "{\"text\": ${json_data}}"
-          curl -H "Content-Type: application/json" -d "{\"text\":\"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
+          curl -H "Content-Type: application/json" -d "{\"text\": \"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
