@@ -194,7 +194,7 @@ if current_day in menu_dict:
     main_course = menu_items[2] if len(menu_items) > 2 else ""
 
     # Construct the output message
-    output_message = f"Matseðill fyrir {current_day[:-2] + 'inn'} {converted_date}:\n\n"
+    output_message = f"Matur í mötuneyti {current_day.lower()[:-2] + 'inn'} {converted_date}:\n\n"
     
     if main_course:
         output_message += " " + main_course + "\n"
