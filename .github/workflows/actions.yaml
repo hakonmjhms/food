@@ -28,7 +28,7 @@ jobs:
       - name: Run Python Script and Capture Output
         id: run_script
         run: |
-          output = $(python scripts/scrape_and_extract.py)
+          output=$(python scripts/scrape_and_extract.py)
           echo "output=food" >>"$GITHUB_OUTPUT"
 
   post-message:
