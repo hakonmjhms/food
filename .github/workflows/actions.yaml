@@ -48,7 +48,7 @@ jobs:
                   "body": [
                     {
                       "type": "TextBlock",
-                      "text": "$JSON_DATA"
+                      "text": "Hello"
                     }
                   ]
                 }
