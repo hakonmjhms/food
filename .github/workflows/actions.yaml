@@ -29,12 +29,10 @@ jobs:
         id: run_script
         run: |
           python scripts/scrape_and_extract.py | tee output.txt
-          echo 'blabla'
-          cat output.txt
 
       - name: Post Message to Teams
         if: success()
         run: |
           json_data=$(cat output.txt | jq -R .)
-          echo "{\"text\":${json_data}}"
+          echo "{\"text\": ${json_data}}"
           curl -H "Content-Type: application/json" -d "{\"text\":\"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
