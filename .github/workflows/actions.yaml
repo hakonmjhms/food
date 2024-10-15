@@ -33,4 +33,4 @@ jobs:
       - name: Post Message to Teams
         if: success()  # Only run this step if the previous steps were successful
         run: |
-          curl -H "Content-Type: application/json" -d "{\"text\":\"$(cat output.txt)\"}" ${{ secrets.TEAMS_WEBHOOK_URL }}  # Replace with your webhook URL
+          curl -H "Content-Type: application/json" -d "{\"text\":\"Hello from GitHub Actions!\"}" ${{ secrets.TEAMS_WEBHOOK_URL }}  # Replace with your webhook URL
