@@ -1,10 +1,9 @@
 name: Send Menu to Teams
 
 on:
-  #add cron
   push:
     branches:
-      main
+      - main
   workflow_dispatch:
 
 jobs:
@@ -25,19 +24,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests beautifulsoup4 PyPDF2
 
-      - name: Run Python Script and Capture Output
+      - name: Run Python Script and Capture Output into Environment Variable
         id: run_script
         run: |
-          python scripts/scrape_and_extract.py | tee output.txt
+          # Capture the output of the Python script and store it in an environment variable
+          output=$(python scripts/scrape_and_extract.py)
+          echo "MENU_OUTPUT=${output}" >> $GITHUB_ENV
 
       - name: Post Message to Teams
         if: success()
+        #env:
+        #  MENU_OUTPUT: ${{ env.MENU_OUTPUT }}
         run: |
-          json_data=$(cat output.txt | jq -R .)
           echo "{\"text\": ${json_data}}"
-          echo "{\"text\": \"Placeholder\"}"
-          echo ""
-          curl -H "Content-Type: application/json" -d "{\"text\": \"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
+          
+          # Post the JSON message to Teams
           curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
           -H "Content-Type: application/json" \
           -d '{
@@ -53,7 +54,7 @@ jobs:
                     "body": [
                       {
                         "type": "TextBlock",
-                        "text": "${json_data}"
+                        "text": "${{ env.MENU_OUTPUT }}"
                       }
                     ]
                   }
