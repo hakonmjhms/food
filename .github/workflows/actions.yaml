@@ -1,10 +1,12 @@
 name: Send Menu to Teams
 
 on:
-  #add cron
+  # Add cron to trigger every day at 9:00 AM (change as needed)
+  schedule:
+    - cron: "0 9 * * *"
   push:
     branches:
-      main
+      - main
   workflow_dispatch:
 
 jobs:
@@ -28,7 +30,8 @@ jobs:
       - name: Run Python Script and Capture Output
         id: run_script
         run: |
-          python scripts/scrape_and_extract.py
+          menu_output=$(python scripts/scrape_and_extract.py)
+          echo "menu_output=$menu_output" >> $GITHUB_ENV
 
       - name: Post Message to Teams
         if: success()
@@ -48,7 +51,7 @@ jobs:
                     "body": [
                       {
                         "type": "TextBlock",
-                        "text": "Variable goes here"
+                        "text": "'"${{ env.menu_output }}"'"
                       }
                     ]
                   }
