@@ -33,30 +33,30 @@ jobs:
       - name: Post Message to Teams
         if: success()
         run: |
-          json_data=$(cat output.txt | jq -R .)
-          echo "{\"text\": ${json_data}}"
-          echo "{\"text\": \"Placeholder\"}"
-          echo ""
-          curl -H "Content-Type: application/json" -d "{\"text\": \"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
-          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-              "type": "message",
-              "attachments": [
-                {
-                  "contentType": "application/vnd.microsoft.card.adaptive",
-                  "contentUrl": null,
-                  "content": {
-                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                    "type": "AdaptiveCard",
-                    "version": "1.2",
-                    "body": [
-                      {
-                        "type": "TextBlock",
-                        "text": "${json_data}"
-                      }
-                    ]
-                  }
+          JSON_DATA=$(cat output.txt | jq -R .)
+
+          request_body=$(< <(cat <<EOF
+          {
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "contentUrl": null,
+                "content": {
+                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                  "type": "AdaptiveCard",
+                  "version": "1.2",
+                  "body": [
+                    {
+                      "type": "TextBlock",
+                      "text": "$JSON_DATA"
+                    }
+                  ]
                 }
-              ]
-            }'
+              }
+            ]
+          }
+          EOF
+          ))
+
+          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" -H "Content-Type: application/json" -d '$request_body'
