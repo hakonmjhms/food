@@ -35,7 +35,7 @@ jobs:
           json_data=$(cat output.txt | jq -R .)
           
           # Prepare the JSON payload using the variable
-          curl -X POST https://YOUR_WEBHOOK_URL_HERE \
+          curl -X POST ${{ secrets.TEAMS_WEBHOOK_URL }} \
           -H "Content-Type: application/json" \
           -d "$(cat <<EOF
           {
