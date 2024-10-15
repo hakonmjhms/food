@@ -45,6 +45,8 @@ jobs:
       - name: Post Message to Teams
         if: success()
         run: |
+          formatted_output=$(echo "${{ env.menu_output }}" | sed ':a;N;$!ba;s/\n/<br>/g')
+          
           curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
           -H "Content-Type: application/json" \
           -d '{
@@ -60,7 +62,8 @@ jobs:
                     "body": [
                       {
                         "type": "TextBlock",
-                        "text": "'"${{ env.menu_output }}"'"
+                        "text": "'"${formatted_output}"'",
+                        "wrap": true
                       }
                     ]
                   }
