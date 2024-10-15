@@ -28,32 +28,30 @@ jobs:
       - name: Run Python Script and Capture Output
         id: run_script
         run: |
-          python scripts/scrape_and_extract.py | tee output.txt
+          python scripts/scrape_and_extract.py
 
       - name: Post Message to Teams
         if: success()
         run: |
-          JSON_DATA=$(cat output.txt | jq -R .)
-
-          request_body="{
-            "type": "message",
-            "attachments": [
-              {
-                "contentType": "application/vnd.microsoft.card.adaptive",
-                "contentUrl": null,
-                "content": {
-                  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                  "type": "AdaptiveCard",
-                  "version": "1.2",
-                  "body": [
-                    {
-                      "type": "TextBlock",
-                      "text": "Hello"
-                    }
-                  ]
+          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{
+              "type": "message",
+              "attachments": [
+                {
+                  "contentType": "application/vnd.microsoft.card.adaptive",
+                  "contentUrl": null,
+                  "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.2",
+                    "body": [
+                      {
+                        "type": "TextBlock",
+                        "text": "Variable goes here"
+                      }
+                    ]
+                  }
                 }
-              }
-            ]
-          }"
-
-          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" -H "Content-Type: application/json" -d '$request_body'
+              ]
+            }'
