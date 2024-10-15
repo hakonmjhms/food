@@ -33,4 +33,4 @@ jobs:
       - name: Post Message to Teams
         if: success()
         run: |
-          curl -H "Content-Type: application/json" -d "{\"text\":\"Hello from GitHub Actions!\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
+          curl -H "Content-Type: application/json" -d "{\"text\":\"$(cat output.txt | jq -R .)\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
