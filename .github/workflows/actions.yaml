@@ -30,8 +30,17 @@ jobs:
       - name: Run Python Script and Capture Output
         id: run_script
         run: |
-          menu_output=$(python scripts/scrape_and_extract.py)
-          echo "menu_output=$menu_output" >> $GITHUB_ENV
+          # Run the Python script and save output to a temporary file
+          python scripts/scrape_and_extract.py > menu_output.txt
+
+      - name: Read Output from File
+        id: read_output
+        run: |
+          # Read the content of the output file
+          menu_output=$(<menu_output.txt)
+          echo "menu_output<<EOF" >> $GITHUB_ENV
+          echo "$menu_output" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Post Message to Teams
         if: success()
