@@ -28,22 +28,19 @@ jobs:
       - name: Run Python Script and Capture Output
         id: run_script
         run: |
-          output=$(python scripts/scrape_and_extract.py)
-          echo "output=food" >>"$GITHUB_OUTPUT"
+          python scripts/scrape_and_extract.py | tee output.txt
 
-  post-message:
-      runs-on: ubuntu-latest
-      needs: send-menu
-      steps:
-        - env:
-            OUTPUT: ${{needs.send-menu.outputs.food}}
-          run: |
-            json_data=$(cat output.txt | jq -R .)
-
-            echo "$OUTPUT"
-
-            request_body=$(< <(cat <<EOF
-            {
+      - name: Post Message to Teams
+        if: success()
+        run: |
+          json_data=$(cat output.txt | jq -R .)
+          echo "{\"text\": ${json_data}}"
+          echo "{\"text\": \"Placeholder\"}"
+          echo ""
+          curl -H "Content-Type: application/json" -d "{\"text\": \"Placeholder\"}" "${{ secrets.TEAMS_WEBHOOK_URL }}"
+          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
+          -H "Content-Type: application/json" \
+          -d '{
               "type": "message",
               "attachments": [
                 {
@@ -56,14 +53,10 @@ jobs:
                     "body": [
                       {
                         "type": "TextBlock",
-                        "text": "$OUTPUT"
+                        "text": "${json_data}"
                       }
                     ]
                   }
                 }
               ]
-            }
-            EOF
-            ))
-
-            curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" -H "Content-Type: application/json" -d '$request_body'
+            }'
