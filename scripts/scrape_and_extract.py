@@ -2,8 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime, timedelta
-import PyPDF2
-import os
+from pdfminer.high_level import extract_text
 
 # Function to convert short month format to full month format
 def convert_date_format(date_string):
@@ -139,20 +138,14 @@ except Exception as e:
     print(f"Enginn matseðill fannst þegar leitað var að \'{text}\'")
     exit(1)
 
-# Step 7: Extract text from the PDF
+# Step 7: Extract text from the PDF using PDFMiner
 pdf_text = ""
 try:
-    with open(pdf_file, 'rb') as f:
-        reader = PyPDF2.PdfReader(f)
-        num_pages = len(reader.pages)
-        
-        for i in range(num_pages):
-            page = reader.pages[i]
-            text = page.extract_text()
-            if text:  # Ensure that text extraction was successful
-                pdf_text += text
+    # Extract text from the PDF file
+    pdf_text = extract_text(pdf_file)  # pdf_file is the path to your PDF
+
 except Exception as e:
-    print(f"Error reading PDF: {e}")
+    print(f"Error extracting text from PDF: {e}")
 
 # Step 8: Identify the current day and extract its menu
 weekdays = [
