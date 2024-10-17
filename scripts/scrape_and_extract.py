@@ -32,6 +32,23 @@ def convert_date_format(date_string):
     # Return the modified date string
     return f"{day.strip()}. {full_month}"
 
+# Function to calculate the menu week number based on current date
+def calculate_menu_week():
+    # The base reference date: Monday of week 423, which starts on Oct 14, 2024
+    base_date = datetime(2024, 10, 14)
+    base_week_number = 423
+    
+    # Get today's date
+    today = datetime.today()
+    
+    # Calculate the difference in weeks between today and the base date
+    weeks_difference = (today - base_date).days // 7
+    
+    # Calculate the current week's menu number
+    current_week_number = base_week_number + weeks_difference
+    
+    return current_week_number
+
 # Step 1: Scrape the webpage for the PDF links
 webpage_url = "https://www.mulakaffi.is/is/veitingastadurinn/matarbakkar"
 # Set headers to mimic a browser
@@ -83,6 +100,7 @@ icelandic_month = months_in_icelandic[start_of_week.strftime('%B')]
 text = f"Matseðill vikunnar {start_of_week.day} - {end_of_week.day} {icelandic_month}"
 
 # Step 4: Loop through all <p> tags to find the right PDF link
+pdf_url = None
 for a_tag in soup.find_all('a'):  # Look for all <a> tags
     link_text = a_tag.get_text(strip=True).replace(u'\xa0', ' ')  # Handle &nbsp; (non-breaking spaces)
     
@@ -91,42 +109,35 @@ for a_tag in soup.find_all('a'):  # Look for all <a> tags
         pdf_url = a_tag['href']  # Get the href attribute (PDF link)
         break
 
-# Step 5: Check if a PDF was found, if not, exit
+# Step 5: Check if a PDF was found, if not, try to calculate the week-based link
 try:
     if pdf_url:
         pdf_url = f'https://www.mulakaffi.is/{pdf_url}'
-        pass
-        #print(f'pdf url: {pdf_url}')
-except:
+    else:
+        # No link found, try the calculated week-based URL
+        current_week_number = calculate_menu_week()
+        pdf_url = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/matsedillvikunnar/vikumatsedill-{current_week_number}.pdf'
+    
+    # Step 6: Download the PDF from the extracted link
+    pdf_response = requests.get(pdf_url, headers=headers)
+
+    if pdf_response.status_code == 200:
+        #pass
+        #print("PDF downloaded successfully!")
+        if pdf_response.status_code == 200:
+        #pass
+        #print("PDF downloaded successfully!")
+            pdf_file = 'menu_week.pdf'
+            
+            # Save the PDF to a file
+            with open(pdf_file, 'wb') as f:
+                f.write(pdf_response.content)
+        else:
+            raise Exception(f"Failed to download PDF from {pdf_url}")
+
+except Exception as e:
     print(f"Enginn matseðill fannst þegar leitað var að \'{text}\'")
     exit(1)
-
-
-# Step 6: Download the PDF from the extracted link
-pdf_response = requests.get(pdf_url, headers=headers)  # Use headers to mimic browser
-
-if pdf_response.status_code == 200:
-    #pass
-    #print("PDF downloaded successfully!")
-    pdf_file = 'menu_week.pdf'
-    
-    # Step 6: Save the PDF to a file
-    with open(pdf_file, 'wb') as f:
-        f.write(pdf_response.content)
-else:
-    print(f"Failed to download PDF. Status code: {pdf_response.status_code}")
-    exit()
-
-with open(pdf_file, 'wb') as f:
-    f.write(pdf_response.content)
-
-# Step 6: Check if the PDF file was created and has content
-if os.path.exists(pdf_file) and os.path.getsize(pdf_file) > 0:
-    pass
-    #print(f"PDF file saved: {pdf_file} (size: {os.path.getsize(pdf_file)} bytes)")
-else:
-    print("PDF file not created or is empty.")
-    exit()
 
 # Step 7: Extract text from the PDF
 pdf_text = ""
@@ -140,10 +151,6 @@ try:
             text = page.extract_text()
             if text:  # Ensure that text extraction was successful
                 pdf_text += text
-    
-    pass
-    #print("PDF text extracted successfully.")
-
 except Exception as e:
     print(f"Error reading PDF: {e}")
 
