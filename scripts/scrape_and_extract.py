@@ -28,7 +28,7 @@ if response.status_code != 200:
     exit()
 
 # Step 2: Define the search text for the current week in Icelandic format
-today = datetime.today()
+today = datetime.today() #-timedelta(days=7) #Used for error checking by looking at the last week
 start_of_week = today - timedelta(days=today.weekday())
 icelandic_month = start_of_week.strftime('%B').replace('January', 'janúar').replace('February', 'febrúar').replace('March', 'mars').replace('April', 'apríl').replace('May', 'maí').replace('June', 'júní').replace('July', 'júlí').replace('August', 'ágúst').replace('September', 'september').replace('October', 'október').replace('November', 'nóvember').replace('December', 'desember')
 text = f"Matseðill vikunnar {start_of_week.day} - {(start_of_week + timedelta(days=6)).day} {icelandic_month}"
@@ -62,7 +62,7 @@ except Exception as e:
 
 # Step 6: Extract today's menu based on weekday
 weekdays = ["Mánudagur", "Þriðjudagur", "Miðvikudagur", "Fimmtudagur", "Föstudagur", "Laugardagur", "Sunnudagur"]
-current_day = weekdays[today.weekday()]
+current_day = weekdays[(today.weekday())%7]
 matches = re.split(r'(' + '|'.join(weekdays) + r')', pdf_text)
 
 # Construct menu dictionary and find today’s menu
@@ -75,12 +75,25 @@ if menu_text:
     converted_date = convert_date_format(date_part)
     menu_items = [item.strip() for item in menu_text[len(date_part):].strip().split('\n') if item.strip()]
 
-    vegan, soup, main_course = (menu_items + ["", "", ""])[:3]  # Avoid index errors
+    if len(menu_items) == 4:
+        holiday = menu_items[0]
+        soup = menu_items[2]
+        main_course = menu_items[3]
+        vegan = menu_items[1]
 
-    output_message = f"Matur í mötuneyti {current_day.lower()[:-2] + 'inn'} {converted_date}:\n\n"
-    if main_course: output_message += " " + main_course + "\n"
-    if soup: output_message += " Súpa: " + soup + "\n"
-    if vegan: output_message += " Vegan: " + vegan + "\n"
+        output_message = f"Matur í mötuneyti {current_day.lower()[:-2] + 'inn'} {converted_date}:\n\n"
+        if holiday: output_message += " " + holiday + "\n"
+        if main_course: output_message += " " + main_course + "\n"
+        if soup: output_message += " Súpa: " + soup + "\n"
+        if vegan: output_message += " Vegan: " + vegan + "\n"
+    else:
+        soup = menu_items[1]
+        main_course = menu_items[2]
+        vegan = menu_items[0]
+        output_message = f"Matur í mötuneyti {current_day.lower()[:-2] + 'inn'} {converted_date}:\n\n"
+        if main_course: output_message += " " + main_course + "\n"
+        if soup: output_message += " Súpa: " + soup + "\n"
+        if vegan: output_message += " Vegan: " + vegan + "\n"
     
     print(output_message.strip())
 else:
