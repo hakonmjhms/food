@@ -82,7 +82,7 @@ if menu_text:
         vegan = menu_items[1]
 
         output_message = f"Matur í mötuneyti {current_day.lower()[:-2] + 'inn'} {converted_date}:\n\n"
-        if holiday: output_message += " " + holiday + "\n"
+        if holiday: output_message += " " + holiday + "!\n"
         if main_course: output_message += " " + main_course + "\n"
         if soup: output_message += " Súpa: " + soup + "\n"
         if vegan: output_message += " Vegan: " + vegan + "\n"
