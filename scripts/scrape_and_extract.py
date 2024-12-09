@@ -37,7 +37,7 @@ text = f"Matseðill vikunnar {start_of_week.day} - {(start_of_week + timedelta(d
 soup = BeautifulSoup(response.content, 'html.parser')
 pdf_url = next(
     (f'https://www.mulakaffi.is/{a["href"]}' for a in soup.find_all('a')
-     if re.search(text, re.sub(r'\s+', ' ', a.get_text(strip=True).replace('\xa0', ' ')), re.IGNORECASE)), 
+     if re.search(re.sub(r'\s+', '', text), re.sub(r'\s+', '', a.get_text(strip=True).replace('\xa0', ' ')), re.IGNORECASE)), 
     None
 )
 if not pdf_url:
