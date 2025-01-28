@@ -44,31 +44,36 @@ jobs:
       - name: Post Message to Lönsklöbb
         if: success()
         run: |
-          formatted_output=$(echo "${{ env.menu_output }}" | sed 's/$/  /; s/\n/\n/g')
-          
-          curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
-          -H "Content-Type: application/json" \
-          -d '{
-              "type": "message",
-              "attachments": [
-                {
-                  "contentType": "application/vnd.microsoft.card.adaptive",
-                  "contentUrl": null,
-                  "content": {
-                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                    "type": "AdaptiveCard",
-                    "version": "1.2",
-                    "body": [
-                      {
-                        "type": "TextBlock",
-                        "text": "'"${formatted_output}"'",
-                        "wrap": true
-                      }
-                    ]
+          if [[ ! "${{ env.menu_output }}" =~ ^Failed ]]; then
+            formatted_output=$(echo "${{ env.menu_output }}" | sed 's/$/  /; s/\n/\n/g')
+            
+            curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+                "type": "message",
+                "attachments": [
+                  {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "contentUrl": null,
+                    "content": {
+                      "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                      "type": "AdaptiveCard",
+                      "version": "1.2",
+                      "body": [
+                        {
+                          "type": "TextBlock",
+                          "text": "'"${formatted_output}"'",
+                          "wrap": true
+                        }
+                      ]
+                    }
                   }
-                }
-              ]
-            }'
+                ]
+              }'
+          else
+            echo "No notification sent as menu_output starts with 'failed'."
+          fi
+  
 
       - name: Post Message to 'Hvað er í matinn?'
         if: success()
