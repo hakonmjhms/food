@@ -3,9 +3,9 @@ name: Send Menu to Teams
 on:
   schedule:
     - cron: "0 8 * * 1-5"
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 jobs:

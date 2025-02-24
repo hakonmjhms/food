@@ -43,12 +43,20 @@ pdf_url = next(
 if not pdf_url:
     pdf_url = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/matsedillvikunnar/vikumatsedill-{calculate_menu_week()}.pdf'
 
-# Step 4: Download and save the PDF
-pdf_response = requests.get(pdf_url, headers=headers)
-if pdf_response.status_code != 200:
-    print(f"Failed to download PDF from {pdf_url}")
-    exit()
+# Step 2: Define a fallback url2
+pdf_url2 = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/innihaldslysingar/vikumatsedill-{calculate_menu_week()}.pdf'
 
+# Step 3: Try downloading from pdf_url
+pdf_response = requests.get(pdf_url, headers=headers)
+
+# Step 4: Check if the request was successful, if not, try url2
+if pdf_response.status_code != 200:
+    pdf_response = requests.get(pdf_url2, headers=headers)
+    
+    # Step 5: Check if the second request was successful
+    if pdf_response.status_code != 200:
+        print(f"Failed to download PDF from {pdf_url} and {pdf_url2}.")
+    
 pdf_file = 'menu_week.pdf'
 with open(pdf_file, 'wb') as f:
     f.write(pdf_response.content)
