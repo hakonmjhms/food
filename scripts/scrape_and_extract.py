@@ -55,7 +55,10 @@ if pdf_response.status_code != 200:
     
     # Step 5: Check if the second request was successful
     if pdf_response.status_code != 200:
-        print(f"Failed to download PDF from {pdf_url} and {pdf_url2}.")
+        pdf_url3 = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/vikumatsedill-{calculate_menu_week()}.pdf'
+        pdf_response = requests.get(pdf_url3, headers=headers)
+        if pdf_response.status_code != 200:
+            print(f"Failed to download PDF from {pdf_url}, {pdf_url2} and {pdf_url3}.")
     
 pdf_file = 'menu_week.pdf'
 with open(pdf_file, 'wb') as f:
