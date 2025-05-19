@@ -41,7 +41,15 @@ pdf_url = next(
     None
 )
 if not pdf_url:
-    pdf_url = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/matsedillvikunnar/vikumatsedill-{calculate_menu_week()}.pdf'
+    text = f"Matseðill vikunnar {start_of_week.day} {icelandic_month} - {(start_of_week + timedelta(days=6)).day} {icelandic_month}"
+    soup = BeautifulSoup(response.content, 'html.parser')
+    pdf_url = next(
+        (f'https://www.mulakaffi.is/{a["href"]}' for a in soup.find_all('a')
+        if re.search(re.sub(r'\s+', '', text), re.sub(r'\s+', '', a.get_text(strip=True).replace('\xa0', ' ')), re.IGNORECASE)), 
+        None
+    )
+    if not pdf_url:
+        pdf_url = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/matsedillvikunnar/vikumatsedill-{calculate_menu_week()}.pdf'
 
 # Step 2: Define a fallback url2
 pdf_url2 = f'https://www.mulakaffi.is/static/files/matsedlar/matsedill-vikunnar/innihaldslysingar/vikumatsedill-{calculate_menu_week()}.pdf'
