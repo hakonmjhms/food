@@ -1,3 +1,4 @@
+import sys
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -10,7 +11,7 @@ current_day = weekdays[today.weekday()]
 headers = {'User-Agent': 'Mozilla/5.0'}
 response = requests.get('https://www.mulakaffi.is/is/veitingastadurinn/matarbakkar', headers=headers)
 if response.status_code != 200:
-    exit()
+    sys.exit(1)
 
 soup = BeautifulSoup(response.content, 'html.parser')
 
@@ -40,4 +41,4 @@ for block in soup.find_all('div', class_='menuItem'):
         print(output.strip())
         break
 else:
-    print(f"No menu found for today: {current_day}.")
+    sys.exit(1)
