@@ -5,13 +5,13 @@
   {% if week %}
     <h1>{{ event_date_display }}</h1>
     {% if status == 'upcoming' %}
-      <p class="status status-closed">Kosning um spá opnar klukkan 7:00 á fimmtudagsmorgni.</p>
+      <p class="status status-closed">Spá opnar klukkan 7:00 á fimmtudagsmorgni.</p>
     {% elif status == 'open' %}
-      <p class="status status-open">Kosning er opin! Henni lokar klukkan 11:15.</p>
+      <p class="status status-open">Spá er opin! Henni lokar klukkan 11:15.</p>
     {% elif status == 'closed' %}
-      <p class="status status-closed">Kosningu um spá er lokað. Tilkynning um réttu kökuna opnar klukkan 11:35.</p>
+      <p class="status status-closed">Spá er lokað. Tilkynning um réttu kökuna opnar klukkan 11:35.</p>
     {% elif status == 'reporting' %}
-      <p class="status status-closed">Hver var rétta kakan? Hjálpaðu til við að ákveða hér fyrir neðan.</p>
+      <p class="status status-closed">Hver var rétta kakan? Hjálpaðu til við að tilkynna hér fyrir neðan.</p>
     {% elif status == 'revealed' %}
       <p class="status status-revealed">Kakan hefur verið afhjúpuð.</p>
     {% endif %}
@@ -96,7 +96,7 @@
       </p>
     {% endif %}
   {% else %}
-    <p>Engin kosning hefur verið sett upp ennþá. Líttu við aftur síðar!</p>
+    <p>Engin spá hefur verið sett upp ennþá. Líttu við aftur síðar!</p>
   {% endif %}
 </section>
 {% endblock %}

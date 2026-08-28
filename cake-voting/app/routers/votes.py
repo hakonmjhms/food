@@ -32,13 +32,13 @@ def submit_vote(
 
     week = db.get(Week, week_id)
     if week is None:
-        raise HTTPException(status_code=404, detail="Kosningavika fannst ekki")
+        raise HTTPException(status_code=404, detail="Vikuspá fannst ekki")
     if week.effective_status(dt.datetime.utcnow()) != WeekStatus.OPEN:
-        raise HTTPException(status_code=400, detail="Kosningu er lokað fyrir þessa viku")
+        raise HTTPException(status_code=400, detail="Spá er lokað fyrir þessa viku")
 
     active_cake_ids = {cake.id for cake in crud.get_active_cakes(db)}
     if cake_id not in active_cake_ids:
-        raise HTTPException(status_code=400, detail="Þessi kaka er ekki í boði til að kjósa um")
+        raise HTTPException(status_code=400, detail="Þessi kaka er ekki í boði til að spá um")
 
     crud.cast_vote(db, week, voter_token, cake_id)
     response = RedirectResponse("/", status_code=303)
@@ -59,7 +59,7 @@ def submit_actual_vote(
 
     week = db.get(Week, week_id)
     if week is None:
-        raise HTTPException(status_code=404, detail="Kosningavika fannst ekki")
+        raise HTTPException(status_code=404, detail="Vikuspá fannst ekki")
     if week.effective_status(dt.datetime.utcnow()) != WeekStatus.REPORTING:
         raise HTTPException(status_code=400, detail="Ekki er enn hægt að tilkynna réttu kökuna fyrir þessa viku")
 
