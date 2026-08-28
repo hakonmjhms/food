@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}This week's cake{% endblock %}
+{% block content %}
+<section class="card">
+  {% if week %}
+    <h1>Thursday, {{ week.event_date.strftime('%B %d, %Y') }}</h1>
+    {% if status == 'upcoming' %}
+      <p class="status status-closed">Prediction voting opens at 7:00 AM Thursday.</p>
+    {% elif status == 'open' %}
+      <p class="status status-open">Voting is open! Closes at 11:15 AM.</p>
+    {% elif status == 'closed' %}
+      <p class="status status-closed">Prediction voting is closed. Reporting on the actual cake opens at 11:35 AM.</p>
+    {% elif status == 'reporting' %}
+      <p class="status status-closed">What was the actual cake? Help the crowd decide below.</p>
+    {% elif status == 'revealed' %}
+      <p class="status status-revealed">The cake has been revealed.</p>
+    {% endif %}
+
+    {% if is_open %}
+      <form method="post" action="/vote" class="vote-form">
+        <input type="hidden" name="week_id" value="{{ week.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="cake-options">
+          {% for cake in cakes %}
+            <label class="cake-option {% if cake.id == my_vote_cake_id %}selected{% endif %}">
+              <input type="radio" name="cake_id" value="{{ cake.id }}" {% if cake.id == my_vote_cake_id %}checked{% endif %} required>
+              <span>{{ cake.name }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="button">
+          {% if my_vote_cake_id %}Update my vote{% else %}Cast my vote{% endif %}
+        </button>
+      </form>
+    {% elif my_vote_cake_id and results %}
+      <p>You predicted:
+        <strong>
+          {% for tally in results.tallies %}{% if tally.cake_id == my_vote_cake_id %}{{ tally.name }}{% endif %}{% endfor %}
+        </strong>
+      </p>
+    {% endif %}
+
+    <h2>Current results</h2>
+    {% if results and results.total_votes %}
+      <ul class="results-list">
+        {% for tally in results.tallies %}
+          <li>
+            <span class="name">{{ tally.name }}</span>
+            <span class="bar"><span class="fill" style="width: {{ tally.percentage }}%"></span></span>
+            <span class="pct">{{ tally.percentage }}% ({{ tally.votes }})</span>
+          </li>
+        {% endfor %}
+      </ul>
+      <p class="total">{{ results.total_votes }} vote{{ 's' if results.total_votes != 1 else '' }} so far.</p>
+    {% else %}
+      <p>No votes yet - be the first!</p>
+    {% endif %}
+
+    {% if actual_vote_open %}
+      <h2>What was the actual cake?</h2>
+      <p>Nobody's confirmed it yet - the first cake to get a majority (at least 2 reports) locks it in for everyone.</p>
+      <form method="post" action="/actual-vote" class="vote-form">
+        <input type="hidden" name="week_id" value="{{ week.id }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="cake-options">
+          {% for cake in cakes %}
+            <label class="cake-option {% if cake.id == my_actual_vote_cake_id %}selected{% endif %}">
+              <input type="radio" name="cake_id" value="{{ cake.id }}" {% if cake.id == my_actual_vote_cake_id %}checked{% endif %} required>
+              <span>{{ cake.name }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="button">
+          {% if my_actual_vote_cake_id %}Update my report{% else %}Report the actual cake{% endif %}
+        </button>
+      </form>
+
+      {% if actual_results and actual_results.total_votes %}
+        <ul class="results-list">
+          {% for tally in actual_results.tallies %}
+            <li>
+              <span class="name">{{ tally.name }}</span>
+              <span class="bar"><span class="fill" style="width: {{ tally.percentage }}%"></span></span>
+              <span class="pct">{{ tally.percentage }}% ({{ tally.votes }})</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endif %}
+
+    {% if week.actual_cake %}
+      <p class="reveal">The actual cake was <strong>{{ week.actual_cake.name }}</strong>!
+        {% if results.correctness %}
+          {{ results.correctness.correct_percentage }}% guessed correctly.
+        {% endif %}
+      </p>
+    {% endif %}
+  {% else %}
+    <p>No voting event has been set up yet. Check back soon!</p>
+  {% endif %}
+</section>
+{% endblock %}
+

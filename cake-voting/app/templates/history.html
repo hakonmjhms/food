@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}History & statistics{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Overview</h1>
+  <ul class="stats-grid">
+    <li><strong>{{ overview.weeks_tracked }}</strong> weeks tracked</li>
+    <li><strong>{{ overview.total_votes }}</strong> total votes</li>
+    {% if overview.crowd_accuracy_percentage is not none %}
+      <li><strong>{{ overview.crowd_accuracy_percentage }}%</strong> crowd accuracy</li>
+    {% endif %}
+    {% if overview.most_predicted_cake %}
+      <li>Most predicted: <strong>{{ overview.most_predicted_cake[0] }}</strong> ({{ overview.most_predicted_cake[1] }})</li>
+    {% endif %}
+    {% if overview.most_served_cake %}
+      <li>Most served: <strong>{{ overview.most_served_cake[0] }}</strong> ({{ overview.most_served_cake[1] }})</li>
+    {% endif %}
+  </ul>
+
+  {% if personal and personal.total_votes %}
+    <h2>Your stats</h2>
+    <ul class="stats-grid">
+      <li><strong>{{ personal.total_votes }}</strong> votes cast</li>
+      {% if personal.accuracy_percentage is not none %}
+        <li><strong>{{ personal.accuracy_percentage }}%</strong> personal accuracy</li>
+      {% endif %}
+      <li><strong>{{ personal.current_streak }}</strong> correct in a row</li>
+    </ul>
+  {% endif %}
+
+  <h2>Past weeks</h2>
+  <div class="week-history">
+    {% for summary in week_summaries %}
+      <article class="week-summary">
+        <h3>{{ summary.week.event_date.strftime('%b %d, %Y') }}</h3>
+        {% if summary.week.actual_cake %}
+          <p>Actual cake: <strong>{{ summary.week.actual_cake.name }}</strong></p>
+        {% else %}
+          <p><em>Not revealed yet</em></p>
+        {% endif %}
+        <p>{{ summary.total_votes }} votes</p>
+        {% if summary.top_pick %}
+          <p>Top pick: {{ summary.top_pick.name }} ({{ summary.top_pick.percentage }}%)</p>
+        {% endif %}
+        {% if summary.correctness %}
+          <p>{{ summary.correctness.correct_percentage }}% guessed correctly
+            {% if summary.correctness.majority_was_correct %}- the crowd was right!{% endif %}
+          </p>
+        {% endif %}
+      </article>
+    {% else %}
+      <p>No weeks recorded yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

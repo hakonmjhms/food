@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Cakes{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Cakes</h1>
+  <p>Anyone can add a cake option here - no login needed.</p>
+
+  <form method="post" action="/cakes" class="simple-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Name <input type="text" name="name" required></label>
+    <label>Description <input type="text" name="description"></label>
+    <button type="submit" class="button">Add cake</button>
+  </form>
+
+  <h2>Current options</h2>
+  <ul>
+    {% for cake in cakes %}
+      <li>{{ cake.name }}{% if not cake.active %} (inactive){% endif %}</li>
+    {% else %}
+      <li>No cakes yet - add the first one above!</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}
