@@ -1,19 +1,19 @@
 {% extends "base.html" %}
-{% block title %}This week's cake{% endblock %}
+{% block title %}Kaka vikunnar{% endblock %}
 {% block content %}
 <section class="card">
   {% if week %}
-    <h1>Thursday, {{ week.event_date.strftime('%B %d, %Y') }}</h1>
+    <h1>{{ event_date_display }}</h1>
     {% if status == 'upcoming' %}
-      <p class="status status-closed">Prediction voting opens at 7:00 AM Thursday.</p>
+      <p class="status status-closed">Kosning um spá opnar klukkan 7:00 á fimmtudagsmorgni.</p>
     {% elif status == 'open' %}
-      <p class="status status-open">Voting is open! Closes at 11:15 AM.</p>
+      <p class="status status-open">Kosning er opin! Henni lokar klukkan 11:15.</p>
     {% elif status == 'closed' %}
-      <p class="status status-closed">Prediction voting is closed. Reporting on the actual cake opens at 11:35 AM.</p>
+      <p class="status status-closed">Kosningu um spá er lokað. Tilkynning um réttu kökuna opnar klukkan 11:35.</p>
     {% elif status == 'reporting' %}
-      <p class="status status-closed">What was the actual cake? Help the crowd decide below.</p>
+      <p class="status status-closed">Hver var rétta kakan? Hjálpaðu til við að ákveða hér fyrir neðan.</p>
     {% elif status == 'revealed' %}
-      <p class="status status-revealed">The cake has been revealed.</p>
+      <p class="status status-revealed">Kakan hefur verið afhjúpuð.</p>
     {% endif %}
 
     {% if is_open %}
@@ -29,18 +29,18 @@
           {% endfor %}
         </div>
         <button type="submit" class="button">
-          {% if my_vote_cake_id %}Update my vote{% else %}Cast my vote{% endif %}
+          {% if my_vote_cake_id %}Uppfæra atkvæðið mitt{% else %}Kjósa{% endif %}
         </button>
       </form>
     {% elif my_vote_cake_id and results %}
-      <p>You predicted:
+      <p>Þú spáðir:
         <strong>
           {% for tally in results.tallies %}{% if tally.cake_id == my_vote_cake_id %}{{ tally.name }}{% endif %}{% endfor %}
         </strong>
       </p>
     {% endif %}
 
-    <h2>Current results</h2>
+    <h2>Núverandi staða</h2>
     {% if results and results.total_votes %}
       <ul class="results-list">
         {% for tally in results.tallies %}
@@ -51,14 +51,14 @@
           </li>
         {% endfor %}
       </ul>
-      <p class="total">{{ results.total_votes }} vote{{ 's' if results.total_votes != 1 else '' }} so far.</p>
+      <p class="total">{{ results.total_votes }} atkvæði hingað til.</p>
     {% else %}
-      <p>No votes yet - be the first!</p>
+      <p>Engin atkvæði enn - vertu fyrst/ur til!</p>
     {% endif %}
 
     {% if actual_vote_open %}
-      <h2>What was the actual cake?</h2>
-      <p>Nobody's confirmed it yet - the first cake to get a majority (at least 2 reports) locks it in for everyone.</p>
+      <h2>Hver var rétta kakan?</h2>
+      <p>Enginn hefur staðfest þetta ennþá - fyrsta kakan sem fær meirihluta (a.m.k. 2 tilkynningar) verður endanleg niðurstaða fyrir alla.</p>
       <form method="post" action="/actual-vote" class="vote-form">
         <input type="hidden" name="week_id" value="{{ week.id }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -71,7 +71,7 @@
           {% endfor %}
         </div>
         <button type="submit" class="button">
-          {% if my_actual_vote_cake_id %}Update my report{% else %}Report the actual cake{% endif %}
+          {% if my_actual_vote_cake_id %}Uppfæra tilkynninguna mína{% else %}Tilkynna réttu kökuna{% endif %}
         </button>
       </form>
 
@@ -89,14 +89,14 @@
     {% endif %}
 
     {% if week.actual_cake %}
-      <p class="reveal">The actual cake was <strong>{{ week.actual_cake.name }}</strong>!
+      <p class="reveal">Rétta kakan var <strong>{{ week.actual_cake.name }}</strong>!
         {% if results.correctness %}
-          {{ results.correctness.correct_percentage }}% guessed correctly.
+          {{ results.correctness.correct_percentage }}% giskuðu rétt.
         {% endif %}
       </p>
     {% endif %}
   {% else %}
-    <p>No voting event has been set up yet. Check back soon!</p>
+    <p>Engin kosning hefur verið sett upp ennþá. Líttu við aftur síðar!</p>
   {% endif %}
 </section>
 {% endblock %}

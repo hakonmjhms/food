@@ -53,7 +53,7 @@ def get_or_create_csrf_token(request: Request) -> str:
 def verify_csrf_token(request: Request, submitted_token: str | None) -> None:
     expected = request.session.get(SESSION_CSRF_KEY)
     if not expected or not submitted_token or not secrets.compare_digest(expected, submitted_token):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid or missing CSRF token")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Ógilt eða vantar CSRF-tóka")
 
 
 class RateLimiter:
@@ -73,7 +73,7 @@ class RateLimiter:
         if len(hits) > self.max_requests:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Too many requests - please slow down",
+                detail="Of margar beiðnir - vinsamlegast hægðu á þér",
             )
 
 

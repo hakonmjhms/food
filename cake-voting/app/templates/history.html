@@ -1,55 +1,55 @@
 {% extends "base.html" %}
-{% block title %}History & statistics{% endblock %}
+{% block title %}Saga og tölfræði{% endblock %}
 {% block content %}
 <section class="card">
-  <h1>Overview</h1>
+  <h1>Yfirlit</h1>
   <ul class="stats-grid">
-    <li><strong>{{ overview.weeks_tracked }}</strong> weeks tracked</li>
-    <li><strong>{{ overview.total_votes }}</strong> total votes</li>
+    <li><strong>{{ overview.weeks_tracked }}</strong> vikur skráðar</li>
+    <li><strong>{{ overview.total_votes }}</strong> atkvæði samtals</li>
     {% if overview.crowd_accuracy_percentage is not none %}
-      <li><strong>{{ overview.crowd_accuracy_percentage }}%</strong> crowd accuracy</li>
+      <li><strong>{{ overview.crowd_accuracy_percentage }}%</strong> nákvæmni fjöldans</li>
     {% endif %}
     {% if overview.most_predicted_cake %}
-      <li>Most predicted: <strong>{{ overview.most_predicted_cake[0] }}</strong> ({{ overview.most_predicted_cake[1] }})</li>
+      <li>Mest spáð: <strong>{{ overview.most_predicted_cake[0] }}</strong> ({{ overview.most_predicted_cake[1] }})</li>
     {% endif %}
     {% if overview.most_served_cake %}
-      <li>Most served: <strong>{{ overview.most_served_cake[0] }}</strong> ({{ overview.most_served_cake[1] }})</li>
+      <li>Oftast borin fram: <strong>{{ overview.most_served_cake[0] }}</strong> ({{ overview.most_served_cake[1] }})</li>
     {% endif %}
   </ul>
 
   {% if personal and personal.total_votes %}
-    <h2>Your stats</h2>
+    <h2>Þín tölfræði</h2>
     <ul class="stats-grid">
-      <li><strong>{{ personal.total_votes }}</strong> votes cast</li>
+      <li><strong>{{ personal.total_votes }}</strong> atkvæði greidd</li>
       {% if personal.accuracy_percentage is not none %}
-        <li><strong>{{ personal.accuracy_percentage }}%</strong> personal accuracy</li>
+        <li><strong>{{ personal.accuracy_percentage }}%</strong> persónuleg nákvæmni</li>
       {% endif %}
-      <li><strong>{{ personal.current_streak }}</strong> correct in a row</li>
+      <li><strong>{{ personal.current_streak }}</strong> rétt í röð</li>
     </ul>
   {% endif %}
 
-  <h2>Past weeks</h2>
+  <h2>Fyrri vikur</h2>
   <div class="week-history">
     {% for summary in week_summaries %}
       <article class="week-summary">
-        <h3>{{ summary.week.event_date.strftime('%b %d, %Y') }}</h3>
+        <h3>{{ summary.event_date_display }}</h3>
         {% if summary.week.actual_cake %}
-          <p>Actual cake: <strong>{{ summary.week.actual_cake.name }}</strong></p>
+          <p>Rétta kakan: <strong>{{ summary.week.actual_cake.name }}</strong></p>
         {% else %}
-          <p><em>Not revealed yet</em></p>
+          <p><em>Ekki afhjúpað ennþá</em></p>
         {% endif %}
-        <p>{{ summary.total_votes }} votes</p>
+        <p>{{ summary.total_votes }} atkvæði</p>
         {% if summary.top_pick %}
-          <p>Top pick: {{ summary.top_pick.name }} ({{ summary.top_pick.percentage }}%)</p>
+          <p>Vinsælasta spáin: {{ summary.top_pick.name }} ({{ summary.top_pick.percentage }}%)</p>
         {% endif %}
         {% if summary.correctness %}
-          <p>{{ summary.correctness.correct_percentage }}% guessed correctly
-            {% if summary.correctness.majority_was_correct %}- the crowd was right!{% endif %}
+          <p>{{ summary.correctness.correct_percentage }}% giskuðu rétt
+            {% if summary.correctness.majority_was_correct %}- fjöldinn hafði rétt fyrir sér!{% endif %}
           </p>
         {% endif %}
       </article>
     {% else %}
-      <p>No weeks recorded yet.</p>
+      <p>Engar vikur skráðar ennþá.</p>
     {% endfor %}
   </div>
 </section>

@@ -24,6 +24,11 @@ def get_db():
 
 
 def init_db() -> None:
-    from . import models  # noqa: F401  imported for side effect: register models on Base.metadata
+    from . import crud, models  # noqa: F401  models imported for side effect: register on Base.metadata
 
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        crud.ensure_default_cakes(db)
+    finally:
+        db.close()

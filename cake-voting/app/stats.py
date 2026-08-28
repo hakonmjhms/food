@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .i18n import format_date_is
 from .models import ActualCakeVote, Cake, Vote, Week
 
 
@@ -71,6 +72,7 @@ def week_summary(db: Session, week: Week) -> dict:
         }
     return {
         "week": week,
+        "event_date_display": format_date_is(week.event_date),
         "tallies": tallies,
         "total_votes": total,
         "top_pick": top_pick,

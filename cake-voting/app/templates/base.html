@@ -1,25 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="is">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Cake Voting{% endblock %}</title>
+  <title>{% block title %}Kökukosning{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="/">Cake Voting</a>
+    <a class="brand" href="/">Kökukosning</a>
     <nav>
-      <a href="/">This week</a>
-      <a href="/history">History</a>
-      <a href="/cakes">Cakes</a>
+      <a href="/">Þessi vika</a>
+      <a href="/history">Saga</a>
+      <a href="/cakes">Kökur</a>
     </nav>
   </header>
   <main>
     {% block content %}{% endblock %}
   </main>
   <footer>
-    <p>Just for fun - predictions are not legally binding.</p>
+    <p>Bara til gamans - spár eru ekki lagalega bindandi.</p>
   </footer>
   <script src="/static/js/main.js"></script>
 </body>

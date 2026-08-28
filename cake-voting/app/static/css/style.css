@@ -1,13 +1,13 @@
 :root {
   color-scheme: light;
-  --bg: #fff8f2;
+  --bg: #eef0f4;
   --card-bg: #ffffff;
-  --primary: #d9534f;
-  --primary-dark: #b8443f;
-  --accent: #f5c65d;
-  --text: #3a2a20;
-  --muted: #8a7568;
-  --border: #f0ddc9;
+  --primary: #17213d;
+  --primary-dark: #0e1526;
+  --accent: #ab9a3c;
+  --text: #17213d;
+  --muted: #6b7280;
+  --border: #dde1e8;
 }
 
 * {
@@ -28,28 +28,28 @@ body {
   justify-content: space-between;
   gap: 1rem;
   padding: 1rem 1.5rem;
-  background: var(--primary);
-  color: white;
+  background: var(--card-bg);
+  color: var(--text);
+  border-bottom: 3px solid var(--accent);
 }
 
 .site-header .brand {
   font-size: 1.4rem;
   font-weight: 700;
-  color: white;
+  color: var(--text);
   text-decoration: none;
 }
 
-.site-header nav a,
-.site-header .account a {
-  color: white;
+.site-header nav a {
+  color: var(--text);
   text-decoration: none;
   margin-right: 1rem;
-  opacity: 0.9;
+  opacity: 0.85;
 }
 
-.site-header nav a:hover,
-.site-header .account a:hover {
+.site-header nav a:hover {
   opacity: 1;
+  color: var(--accent);
   text-decoration: underline;
 }
 
@@ -85,13 +85,13 @@ h1 {
 }
 
 .status-closed {
-  background: #f2e6e6;
+  background: #e7e9ee;
   color: var(--primary-dark);
 }
 
 .status-revealed {
-  background: #fff3d6;
-  color: #8a6100;
+  background: #f6f1dc;
+  color: #7a6a1f;
 }
 
 .cake-options {
@@ -116,7 +116,7 @@ h1 {
 .cake-option.selected,
 .cake-option:has(input:checked) {
   border-color: var(--primary);
-  background: #fdeceb;
+  background: #e9edf5;
 }
 
 .button {

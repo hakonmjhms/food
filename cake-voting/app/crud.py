@@ -9,6 +9,15 @@ from .models import ActualCakeVote, Cake, Vote, Week
 # all reports so far, before it's automatically locked in (there's no admin to do it).
 ACTUAL_CAKE_MIN_VOTES = 2
 
+# The only cakes people can vote for - there's no admin, so this list is the single
+# source of truth. Edit it here (and restart the app) to change the options.
+DEFAULT_CAKE_NAMES = [
+    "Súkkulaðikaka",
+    "Gulrótarkaka",
+    "Ostakaka",
+    "Marmarakaka",
+    "Vanillukaka",
+]
 
 
 def get_active_cakes(db: Session) -> list[Cake]:
@@ -19,12 +28,21 @@ def get_all_cakes(db: Session) -> list[Cake]:
     return list(db.scalars(select(Cake).order_by(Cake.name)))
 
 
-def create_cake(db: Session, name: str, description: str | None = None, photo_url: str | None = None) -> Cake:
-    cake = Cake(name=name.strip(), description=description, photo_url=photo_url)
+def create_cake(db: Session, name: str, photo_url: str | None = None) -> Cake:
+    cake = Cake(name=name.strip(), photo_url=photo_url)
     db.add(cake)
     db.commit()
     db.refresh(cake)
     return cake
+
+
+def ensure_default_cakes(db: Session) -> None:
+    """Seed the hardcoded cake list on startup - idempotent, so it's safe to call every time."""
+    existing_names = {cake.name for cake in get_all_cakes(db)}
+    for name in DEFAULT_CAKE_NAMES:
+        if name not in existing_names:
+            db.add(Cake(name=name))
+    db.commit()
 
 
 def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> Week:

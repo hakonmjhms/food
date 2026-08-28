@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from .. import crud, stats
 from ..database import get_db
+from ..i18n import format_weekday_date_is
 from ..models import WeekStatus
 from ..security import attach_voter_cookie, get_or_create_csrf_token, get_voter_token
 
@@ -22,6 +23,7 @@ def index(request: Request, db: Session = Depends(get_db)):
     context = {
         "csrf_token": get_or_create_csrf_token(request),
         "week": week,
+        "event_date_display": format_weekday_date_is(week.event_date),
         "status": week.effective_status().value,
         "is_open": week.effective_status() == WeekStatus.OPEN,
         "actual_vote_open": week.effective_status() == WeekStatus.REPORTING,
