@@ -82,22 +82,27 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
 
 
 def _sync_upcoming_week_times(db: Session, week: Week, now: dt.datetime, settings) -> None:
-    """Keep an as-yet-unopened week's times in sync with the current schedule
-    settings. Once voting has actually opened, times are left alone - the point
-    is to make config changes take effect for weeks nothing has happened for yet,
-    not to shift a window people may already be voting in."""
-    if now >= week.voting_opens_at:
-        return
-    new_times = (
-        dt.datetime.combine(week.event_date, settings.vote_open_dt_time),
-        dt.datetime.combine(week.event_date, settings.vote_cutoff_dt_time),
-        dt.datetime.combine(week.event_date, settings.actual_vote_open_dt_time),
-        dt.datetime.combine(week.event_date, settings.actual_vote_close_dt_time),
-    )
-    current_times = (week.voting_opens_at, week.voting_closes_at, week.actual_vote_opens_at, week.actual_vote_closes_at)
-    if current_times == new_times:
-        return
-    week.voting_opens_at, week.voting_closes_at, week.actual_vote_opens_at, week.actual_vote_closes_at = new_times
+    """Keep a week's not-yet-reached time boundaries in sync with the current
+    schedule settings. Each boundary is synced independently, based on whether
+    that specific boundary is still in the future - so e.g. changing the cutoff
+    time still takes effect while voting is already open, but a boundary that's
+    already passed is left alone rather than retroactively reshuffled."""
+    changed = False
+    for attr, configured_time in (
+        ("voting_opens_at", settings.vote_open_dt_time),
+        ("voting_closes_at", settings.vote_cutoff_dt_time),
+        ("actual_vote_opens_at", settings.actual_vote_open_dt_time),
+        ("actual_vote_closes_at", settings.actual_vote_close_dt_time),
+    ):
+        if now >= getattr(week, attr):
+            continue
+        new_value = dt.datetime.combine(week.event_date, configured_time)
+        if getattr(week, attr) != new_value:
+            setattr(week, attr, new_value)
+            changed = True
+
+    if changed:
+        db.commit()
     db.commit()
 
 

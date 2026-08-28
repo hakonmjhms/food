@@ -150,7 +150,7 @@ def test_sync_upcoming_week_times_picks_up_new_schedule_settings(db):
     assert week.actual_vote_closes_at == dt.datetime.combine(event_date, dt.time(18, 0))
 
 
-def test_sync_upcoming_week_times_leaves_an_already_open_week_alone(db):
+def test_sync_upcoming_week_times_leaves_a_boundary_alone_once_it_has_passed(db):
     event_date = dt.date(2026, 2, 19)
     week = Week(
         event_date=event_date,
@@ -163,10 +163,15 @@ def test_sync_upcoming_week_times_leaves_an_already_open_week_alone(db):
     db.commit()
 
     new_settings = _FakeScheduleSettings(dt.time(8, 0), dt.time(12, 0), dt.time(12, 15), dt.time(18, 0))
-    after_open = dt.datetime.combine(event_date, dt.time(9, 0))  # voting has already started
+    after_open = dt.datetime.combine(event_date, dt.time(9, 0))  # voting is already open, but hasn't closed yet
     crud._sync_upcoming_week_times(db, week, after_open, new_settings)
 
+    # The open time already passed, so it's left alone...
     assert week.voting_opens_at == dt.datetime.combine(event_date, dt.time(7, 0))
+    # ...but the cutoff and later boundaries haven't happened yet, so they still update.
+    assert week.voting_closes_at == dt.datetime.combine(event_date, dt.time(12, 0))
+    assert week.actual_vote_opens_at == dt.datetime.combine(event_date, dt.time(12, 15))
+    assert week.actual_vote_closes_at == dt.datetime.combine(event_date, dt.time(18, 0))
 
 
 def test_cake_overview_tracks_predictions_and_last_served_date(db):
