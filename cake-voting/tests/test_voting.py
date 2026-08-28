@@ -26,6 +26,7 @@ def _make_week(db, event_date: dt.date) -> Week:
         voting_opens_at=now - dt.timedelta(hours=2),
         voting_closes_at=now - dt.timedelta(hours=1),
         actual_vote_opens_at=now - dt.timedelta(minutes=30),
+        actual_vote_closes_at=now + dt.timedelta(hours=1),
     )
     db.add(week)
     db.commit()

@@ -5,13 +5,15 @@
   {% if week %}
     <h1>{{ event_date_display }}</h1>
     {% if status == 'upcoming' %}
-      <p class="status status-closed">Spá opnar klukkan 7:00 á {{ vote_weekday_morning_phrase }}.</p>
+      <p class="status status-closed">Spá opnar klukkan {{ vote_open_display }} á {{ vote_weekday_morning_phrase }}.</p>
     {% elif status == 'open' %}
-      <p class="status status-open">Spá er opin! Henni lokar klukkan 11:15.</p>
+      <p class="status status-open">Spá er opin! Henni lokar klukkan {{ vote_cutoff_display }}.</p>
     {% elif status == 'closed' %}
-      <p class="status status-closed">Spá er lokað. Tilkynning um réttu kökuna opnar klukkan 11:35.</p>
+      <p class="status status-closed">Spá er lokað. Tilkynning um réttu kökuna opnar klukkan {{ actual_vote_open_display }}.</p>
     {% elif status == 'reporting' %}
-      <p class="status status-closed">Hver var rétta kakan? Hjálpaðu til við að tilkynna hér fyrir neðan.</p>
+      <p class="status status-closed">Hver var rétta kakan? Hjálpaðu til við að tilkynna hér fyrir neðan. Tilkynningum lokar klukkan {{ actual_vote_close_display }}.</p>
+    {% elif status == 'unresolved' %}
+      <p class="status status-closed">Tilkynningum um réttu kökuna var lokað klukkan {{ actual_vote_close_display }} án þess að samstaða næðist.</p>
     {% elif status == 'revealed' %}
       <p class="status status-revealed">Kakan hefur verið afhjúpuð.</p>
     {% endif %}
@@ -56,26 +58,30 @@
       <p>Engin atkvæði enn - vertu fyrst/ur til!</p>
     {% endif %}
 
-    {% if actual_vote_open %}
+    {% if actual_results %}
       <h2>Hver var rétta kakan?</h2>
-      <p>Enginn hefur staðfest þetta ennþá - fyrsta kakan sem fær meirihluta (a.m.k. 2 tilkynningar) verður endanleg niðurstaða fyrir alla.</p>
-      <form method="post" action="/actual-vote" class="vote-form">
-        <input type="hidden" name="week_id" value="{{ week.id }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <div class="cake-options">
-          {% for cake in cakes %}
-            <label class="cake-option {% if cake.id == my_actual_vote_cake_id %}selected{% endif %}">
-              <input type="radio" name="cake_id" value="{{ cake.id }}" {% if cake.id == my_actual_vote_cake_id %}checked{% endif %} required>
-              <span>{{ cake.name }}</span>
-            </label>
-          {% endfor %}
-        </div>
-        <button type="submit" class="button">
-          {% if my_actual_vote_cake_id %}Uppfæra tilkynninguna mína{% else %}Tilkynna réttu kökuna{% endif %}
-        </button>
-      </form>
+      {% if actual_vote_open %}
+        <p>Enginn hefur staðfest þetta ennþá - fyrsta kakan sem fær meirihluta (a.m.k. 2 tilkynningar) verður endanleg niðurstaða fyrir alla.</p>
+        <form method="post" action="/actual-vote" class="vote-form">
+          <input type="hidden" name="week_id" value="{{ week.id }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <div class="cake-options">
+            {% for cake in cakes %}
+              <label class="cake-option {% if cake.id == my_actual_vote_cake_id %}selected{% endif %}">
+                <input type="radio" name="cake_id" value="{{ cake.id }}" {% if cake.id == my_actual_vote_cake_id %}checked{% endif %} required>
+                <span>{{ cake.name }}</span>
+              </label>
+            {% endfor %}
+          </div>
+          <button type="submit" class="button">
+            {% if my_actual_vote_cake_id %}Uppfæra tilkynninguna mína{% else %}Tilkynna réttu kökuna{% endif %}
+          </button>
+        </form>
+      {% else %}
+        <p>Enginn náði samstöðu áður en tilkynningum var lokað.</p>
+      {% endif %}
 
-      {% if actual_results and actual_results.total_votes %}
+      {% if actual_results.total_votes %}
         <ul class="results-list">
           {% for tally in actual_results.tallies %}
             <li>

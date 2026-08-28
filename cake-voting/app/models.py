@@ -27,6 +27,7 @@ class WeekStatus(str, enum.Enum):
     OPEN = "open"
     CLOSED = "closed"  # prediction voting closed, actual-cake reporting not open yet
     REPORTING = "reporting"  # actual-cake reporting is open
+    UNRESOLVED = "unresolved"  # reporting closed without the crowd reaching consensus
     REVEALED = "revealed"
 
 
@@ -52,6 +53,7 @@ class Week(Base):
     voting_opens_at: Mapped[dt.datetime] = mapped_column(DateTime)
     voting_closes_at: Mapped[dt.datetime] = mapped_column(DateTime)
     actual_vote_opens_at: Mapped[dt.datetime] = mapped_column(DateTime)
+    actual_vote_closes_at: Mapped[dt.datetime] = mapped_column(DateTime)
     actual_cake_id: Mapped[int | None] = mapped_column(ForeignKey("cakes.id"), nullable=True)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime, server_default=func.now())
 
@@ -76,7 +78,9 @@ class Week(Base):
             return WeekStatus.OPEN
         if now < self.actual_vote_opens_at:
             return WeekStatus.CLOSED
-        return WeekStatus.REPORTING
+        if now <= self.actual_vote_closes_at:
+            return WeekStatus.REPORTING
+        return WeekStatus.UNRESOLVED
 
 
 class Vote(Base):

@@ -53,9 +53,8 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
     """The upcoming/current week, auto-created for the next configured weekday if none exists.
 
     There's no admin to schedule weeks, so the app creates them itself on demand.
-    Prediction voting runs 7:00-11:15 on the day, and actual-cake reporting opens
-    at 11:35 (leaving a short gap after voting closes). The weekday itself comes
-    from the VOTE_WEEKDAY setting (default: Thursday).
+    The weekday and the open/cutoff/reporting times all come from settings
+    (VOTE_WEEKDAY, VOTE_OPEN_TIME, VOTE_CUTOFF_TIME, ACTUAL_VOTE_OPEN_TIME, ACTUAL_VOTE_CLOSE_TIME).
     """
     now = now or dt.datetime.utcnow()
     today = now.date()
@@ -63,16 +62,17 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
     if week is not None:
         return week
 
-    target_weekday = get_settings().vote_python_weekday
-    days_until_target = (target_weekday - today.weekday()) % 7
+    settings = get_settings()
+    days_until_target = (settings.vote_python_weekday - today.weekday()) % 7
     event_date = today + dt.timedelta(days=days_until_target)
     try:
         return create_week(
             db,
             event_date=event_date,
-            voting_opens_at=dt.datetime.combine(event_date, dt.time(7, 0)),
-            voting_closes_at=dt.datetime.combine(event_date, dt.time(11, 15)),
-            actual_vote_opens_at=dt.datetime.combine(event_date, dt.time(11, 35)),
+            voting_opens_at=dt.datetime.combine(event_date, settings.vote_open_dt_time),
+            voting_closes_at=dt.datetime.combine(event_date, settings.vote_cutoff_dt_time),
+            actual_vote_opens_at=dt.datetime.combine(event_date, settings.actual_vote_open_dt_time),
+            actual_vote_closes_at=dt.datetime.combine(event_date, settings.actual_vote_close_dt_time),
         )
     except Exception:
         db.rollback()
@@ -95,12 +95,14 @@ def create_week(
     voting_opens_at: dt.datetime,
     voting_closes_at: dt.datetime,
     actual_vote_opens_at: dt.datetime,
+    actual_vote_closes_at: dt.datetime,
 ) -> Week:
     week = Week(
         event_date=event_date,
         voting_opens_at=voting_opens_at,
         voting_closes_at=voting_closes_at,
         actual_vote_opens_at=actual_vote_opens_at,
+        actual_vote_closes_at=actual_vote_closes_at,
     )
     db.add(week)
     db.commit()

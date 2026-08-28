@@ -49,3 +49,8 @@ def weekday_morning_phrase_is(python_weekday: int) -> str:
     """
     name = _WEEKDAYS_IS[python_weekday]
     return f"{name[:-2]}smorgni"
+
+
+def format_time_is(value: dt.time) -> str:
+    """E.g. '07:00'."""
+    return f"{value.hour:02d}:{value.minute:02d}"

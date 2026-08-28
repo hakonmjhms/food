@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from .. import crud, stats
 from ..config import get_settings
 from ..database import get_db
-from ..i18n import format_weekday_date_is, weekday_morning_phrase_is
+from ..i18n import format_time_is, format_weekday_date_is, weekday_morning_phrase_is
 from ..models import WeekStatus
 from ..security import attach_voter_cookie, get_or_create_csrf_token, get_voter_token
 
@@ -20,12 +20,17 @@ templates = Jinja2Templates(directory=str(Path(__file__).resolve().parent.parent
 def index(request: Request, db: Session = Depends(get_db)):
     voter_token = get_voter_token(request)
     week = crud.get_or_create_current_week(db)
+    settings = get_settings()
 
     context = {
         "csrf_token": get_or_create_csrf_token(request),
         "week": week,
         "event_date_display": format_weekday_date_is(week.event_date),
-        "vote_weekday_morning_phrase": weekday_morning_phrase_is(get_settings().vote_python_weekday),
+        "vote_weekday_morning_phrase": weekday_morning_phrase_is(settings.vote_python_weekday),
+        "vote_open_display": format_time_is(settings.vote_open_dt_time),
+        "vote_cutoff_display": format_time_is(settings.vote_cutoff_dt_time),
+        "actual_vote_open_display": format_time_is(settings.actual_vote_open_dt_time),
+        "actual_vote_close_display": format_time_is(settings.actual_vote_close_dt_time),
         "status": week.effective_status().value,
         "is_open": week.effective_status() == WeekStatus.OPEN,
         "actual_vote_open": week.effective_status() == WeekStatus.REPORTING,
@@ -38,7 +43,7 @@ def index(request: Request, db: Session = Depends(get_db)):
     my_vote = crud.get_vote_by_token(db, week.id, voter_token)
     context["my_vote_cake_id"] = my_vote.cake_id if my_vote else None
 
-    if context["actual_vote_open"]:
+    if week.effective_status() in (WeekStatus.REPORTING, WeekStatus.UNRESOLVED):
         actual_tallies, actual_total = stats.actual_cake_results(db, week)
         my_actual_vote = crud.get_actual_vote_by_token(db, week.id, voter_token)
         context.update(
