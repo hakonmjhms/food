@@ -110,7 +110,8 @@ output = f"Matur í mötuneyti {day_dative} {date_str}:\n\n"
 if holiday:
     output += f" {holiday}!\n"
 if current_day == "fimmtudagur":
-    output += " KAKA!\n"
+    # Adaptive Card TextBlocks don't auto-linkify bare URLs, so use Markdown link syntax.
+    output += " KAKA! [Spáið um köku hér](https://food-dt9u.onrender.com)\n"
 for dish in dishes:
     output += f" {dish}\n"
 
