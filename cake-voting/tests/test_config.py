@@ -21,7 +21,7 @@ def test_vote_python_weekday_saturday():
 
 def test_military_time_fields_parse_to_time_objects():
     settings = Settings(
-        vote_open_time=700, vote_cutoff_time=1115, actual_vote_open_time=1135, actual_vote_close_time=1700
+        vote_open_time=700, VOTE_CLOSE_TIME=1115, actual_vote_open_time=1135, actual_vote_close_time=1700
     )
     assert settings.vote_open_dt_time == dt.time(7, 0)
     assert settings.vote_cutoff_dt_time == dt.time(11, 15)
@@ -31,12 +31,12 @@ def test_military_time_fields_parse_to_time_objects():
 
 def test_invalid_military_time_is_rejected():
     with pytest.raises(ValidationError):
-        Settings(vote_cutoff_time=1160)  # minute 60 doesn't exist
+        Settings(VOTE_CLOSE_TIME=1160)  # minute 60 doesn't exist
 
 
 def test_schedule_must_be_in_order():
     with pytest.raises(ValidationError):
-        Settings(vote_open_time=1115, vote_cutoff_time=700, actual_vote_open_time=1135)
+        Settings(vote_open_time=1115, VOTE_CLOSE_TIME=700, actual_vote_open_time=1135)
 
 
 def test_actual_vote_close_must_be_after_open():

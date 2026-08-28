@@ -54,7 +54,7 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
 
     There's no admin to schedule weeks, so the app creates them itself on demand.
     The weekday and the open/cutoff/reporting times all come from settings
-    (VOTE_WEEKDAY, VOTE_OPEN_TIME, VOTE_CUTOFF_TIME, ACTUAL_VOTE_OPEN_TIME, ACTUAL_VOTE_CLOSE_TIME).
+    (VOTE_WEEKDAY, VOTE_OPEN_TIME, VOTE_CLOSE_TIME, ACTUAL_VOTE_OPEN_TIME, ACTUAL_VOTE_CLOSE_TIME).
     """
     now = now or dt.datetime.utcnow()
     today = now.date()

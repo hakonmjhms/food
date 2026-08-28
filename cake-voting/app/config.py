@@ -21,11 +21,11 @@ class Settings(BaseSettings):
 
     # Vote schedule, in military time (HHMM), e.g. 1100 for 11:00.
     vote_open_time: int = Field(default=700, ge=0, le=2359)
-    vote_cutoff_time: int = Field(default=1115, ge=0, le=2359)
+    VOTE_CLOSE_TIME: int = Field(default=1115, ge=0, le=2359)
     actual_vote_open_time: int = Field(default=1135, ge=0, le=2359)
     actual_vote_close_time: int = Field(default=1700, ge=0, le=2359)
 
-    @field_validator("vote_open_time", "vote_cutoff_time", "actual_vote_open_time", "actual_vote_close_time")
+    @field_validator("vote_open_time", "VOTE_CLOSE_TIME", "actual_vote_open_time", "actual_vote_close_time")
     @classmethod
     def _validate_military_time(cls, value: int) -> int:
         hours, minutes = divmod(value, 100)
@@ -36,11 +36,11 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _validate_time_order(self) -> "Settings":
         if not (
-            self.vote_open_time < self.vote_cutoff_time
+            self.vote_open_time < self.VOTE_CLOSE_TIME
             <= self.actual_vote_open_time < self.actual_vote_close_time
         ):
             raise ValueError(
-                "Vote schedule must satisfy vote_open_time < vote_cutoff_time <= "
+                "Vote schedule must satisfy vote_open_time < VOTE_CLOSE_TIME <= "
                 "actual_vote_open_time < actual_vote_close_time"
             )
         return self
@@ -56,7 +56,7 @@ class Settings(BaseSettings):
 
     @property
     def vote_cutoff_dt_time(self) -> dt.time:
-        return self._to_time(self.vote_cutoff_time)
+        return self._to_time(self.VOTE_CLOSE_TIME)
 
     @property
     def actual_vote_open_dt_time(self) -> dt.time:
