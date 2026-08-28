@@ -58,11 +58,12 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
     """
     now = now or dt.datetime.utcnow()
     today = now.date()
+    settings = get_settings()
     week = db.scalar(select(Week).where(Week.event_date >= today).order_by(Week.event_date))
     if week is not None:
+        _sync_upcoming_week_times(db, week, now, settings)
         return week
 
-    settings = get_settings()
     days_until_target = (settings.vote_python_weekday - today.weekday()) % 7
     event_date = today + dt.timedelta(days=days_until_target)
     try:
@@ -78,6 +79,26 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
         db.rollback()
         # A concurrent request may have created this week's row first.
         return db.scalar(select(Week).where(Week.event_date == event_date))
+
+
+def _sync_upcoming_week_times(db: Session, week: Week, now: dt.datetime, settings) -> None:
+    """Keep an as-yet-unopened week's times in sync with the current schedule
+    settings. Once voting has actually opened, times are left alone - the point
+    is to make config changes take effect for weeks nothing has happened for yet,
+    not to shift a window people may already be voting in."""
+    if now >= week.voting_opens_at:
+        return
+    new_times = (
+        dt.datetime.combine(week.event_date, settings.vote_open_dt_time),
+        dt.datetime.combine(week.event_date, settings.vote_cutoff_dt_time),
+        dt.datetime.combine(week.event_date, settings.actual_vote_open_dt_time),
+        dt.datetime.combine(week.event_date, settings.actual_vote_close_dt_time),
+    )
+    current_times = (week.voting_opens_at, week.voting_closes_at, week.actual_vote_opens_at, week.actual_vote_closes_at)
+    if current_times == new_times:
+        return
+    week.voting_opens_at, week.voting_closes_at, week.actual_vote_opens_at, week.actual_vote_closes_at = new_times
+    db.commit()
 
 
 def get_week_history(db: Session, limit: int = 52, now: dt.datetime | None = None) -> list[Week]:

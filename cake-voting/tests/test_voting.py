@@ -118,6 +118,57 @@ def test_actual_cake_vote_is_one_per_voter_per_week(db):
     assert reports[0].cake_id == cake_b.id
 
 
+class _FakeScheduleSettings:
+    """Minimal stand-in for Settings, exposing only what _sync_upcoming_week_times needs."""
+
+    def __init__(self, open_time: dt.time, cutoff_time: dt.time, actual_open: dt.time, actual_close: dt.time):
+        self.vote_open_dt_time = open_time
+        self.vote_cutoff_dt_time = cutoff_time
+        self.actual_vote_open_dt_time = actual_open
+        self.actual_vote_close_dt_time = actual_close
+
+
+def test_sync_upcoming_week_times_picks_up_new_schedule_settings(db):
+    event_date = dt.date(2026, 2, 12)
+    week = Week(
+        event_date=event_date,
+        voting_opens_at=dt.datetime.combine(event_date, dt.time(7, 0)),
+        voting_closes_at=dt.datetime.combine(event_date, dt.time(11, 15)),
+        actual_vote_opens_at=dt.datetime.combine(event_date, dt.time(11, 35)),
+        actual_vote_closes_at=dt.datetime.combine(event_date, dt.time(17, 0)),
+    )
+    db.add(week)
+    db.commit()
+
+    new_settings = _FakeScheduleSettings(dt.time(8, 0), dt.time(12, 0), dt.time(12, 15), dt.time(18, 0))
+    before_open = dt.datetime.combine(event_date, dt.time(6, 0))  # still before the (old) 7:00 open time
+    crud._sync_upcoming_week_times(db, week, before_open, new_settings)
+
+    assert week.voting_opens_at == dt.datetime.combine(event_date, dt.time(8, 0))
+    assert week.voting_closes_at == dt.datetime.combine(event_date, dt.time(12, 0))
+    assert week.actual_vote_opens_at == dt.datetime.combine(event_date, dt.time(12, 15))
+    assert week.actual_vote_closes_at == dt.datetime.combine(event_date, dt.time(18, 0))
+
+
+def test_sync_upcoming_week_times_leaves_an_already_open_week_alone(db):
+    event_date = dt.date(2026, 2, 19)
+    week = Week(
+        event_date=event_date,
+        voting_opens_at=dt.datetime.combine(event_date, dt.time(7, 0)),
+        voting_closes_at=dt.datetime.combine(event_date, dt.time(11, 15)),
+        actual_vote_opens_at=dt.datetime.combine(event_date, dt.time(11, 35)),
+        actual_vote_closes_at=dt.datetime.combine(event_date, dt.time(17, 0)),
+    )
+    db.add(week)
+    db.commit()
+
+    new_settings = _FakeScheduleSettings(dt.time(8, 0), dt.time(12, 0), dt.time(12, 15), dt.time(18, 0))
+    after_open = dt.datetime.combine(event_date, dt.time(9, 0))  # voting has already started
+    crud._sync_upcoming_week_times(db, week, after_open, new_settings)
+
+    assert week.voting_opens_at == dt.datetime.combine(event_date, dt.time(7, 0))
+
+
 def test_cake_overview_tracks_predictions_and_last_served_date(db):
     cake_a = Cake(name="Chocolate")
     cake_b = Cake(name="Vanilla")
