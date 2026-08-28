@@ -77,8 +77,13 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
         return db.scalar(select(Week).where(Week.event_date == event_date))
 
 
-def get_week_history(db: Session, limit: int = 52) -> list[Week]:
-    return list(db.scalars(select(Week).order_by(Week.event_date.desc()).limit(limit)))
+def get_week_history(db: Session, limit: int = 52, now: dt.datetime | None = None) -> list[Week]:
+    """Weeks that have already happened - excludes the upcoming/current week, which isn't history yet."""
+    now = now or dt.datetime.utcnow()
+    today = now.date()
+    return list(
+        db.scalars(select(Week).where(Week.event_date < today).order_by(Week.event_date.desc()).limit(limit))
+    )
 
 
 def create_week(

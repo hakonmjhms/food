@@ -57,6 +57,7 @@ def history(request: Request, db: Session = Depends(get_db)):
     overview = stats.history_overview(db, weeks)
     week_summaries = [stats.week_summary(db, w) for w in weeks]
     personal = stats.personal_stats(db, voter_token)
+    cake_stats = stats.cake_overview(db)
     response = templates.TemplateResponse(
         request,
         "history.html",
@@ -64,6 +65,7 @@ def history(request: Request, db: Session = Depends(get_db)):
             "overview": overview,
             "week_summaries": week_summaries,
             "personal": personal,
+            "cake_stats": cake_stats,
         },
     )
     return attach_voter_cookie(response, voter_token)

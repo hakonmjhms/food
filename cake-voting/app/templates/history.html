@@ -6,14 +6,23 @@
   <ul class="stats-grid">
     <li><strong>{{ overview.weeks_tracked }}</strong> vikur skráðar</li>
     <li><strong>{{ overview.total_votes }}</strong> atkvæði samtals</li>
+    {% if overview.avg_votes_per_week is not none %}
+      <li><strong>{{ overview.avg_votes_per_week }}</strong> atkvæði að meðaltali á viku</li>
+    {% endif %}
     {% if overview.crowd_accuracy_percentage is not none %}
       <li><strong>{{ overview.crowd_accuracy_percentage }}%</strong> nákvæmni fjöldans</li>
+    {% endif %}
+    {% if overview.crowd_current_streak %}
+      <li><strong>{{ overview.crowd_current_streak }}</strong> vikur í röð sem fjöldinn hafði rétt fyrir sér</li>
     {% endif %}
     {% if overview.most_predicted_cake %}
       <li>Mest spáð: <strong>{{ overview.most_predicted_cake[0] }}</strong> ({{ overview.most_predicted_cake[1] }})</li>
     {% endif %}
     {% if overview.most_served_cake %}
       <li>Oftast borin fram: <strong>{{ overview.most_served_cake[0] }}</strong> ({{ overview.most_served_cake[1] }})</li>
+    {% endif %}
+    {% if overview.most_often_wrong_guess %}
+      <li>Algengasta ranga giskið: <strong>{{ overview.most_often_wrong_guess[0] }}</strong> ({{ overview.most_often_wrong_guess[1] }})</li>
     {% endif %}
   </ul>
 
@@ -28,6 +37,30 @@
     </ul>
   {% endif %}
 
+  <h2>Kökur í tölum</h2>
+  <table class="cake-table">
+    <thead>
+      <tr>
+        <th>Kaka</th>
+        <th>Spáð</th>
+        <th>Borin fram</th>
+        <th>Síðast borin fram</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for cake in cake_stats %}
+        <tr>
+          <td>{{ cake.name }}</td>
+          <td>{{ cake.times_predicted }}</td>
+          <td>{{ cake.times_served }}</td>
+          <td>{{ cake.last_served_display or "Ekki skráð" }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4">Engar kökur skráðar ennþá.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
   <h2>Fyrri vikur</h2>
   <div class="week-history">
     {% for summary in week_summaries %}
@@ -36,7 +69,7 @@
         {% if summary.week.actual_cake %}
           <p>Rétta kakan: <strong>{{ summary.week.actual_cake.name }}</strong></p>
         {% else %}
-          <p><em>Ekki afhjúpað ennþá</em></p>
+          <p><em>Óljóst</em></p>
         {% endif %}
         <p>{{ summary.total_votes }} atkvæði</p>
         {% if summary.top_pick %}

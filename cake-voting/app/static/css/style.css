@@ -186,6 +186,25 @@ h1 {
   gap: 0.75rem;
 }
 
+.cake-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+.cake-table th,
+.cake-table td {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cake-table th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
 .week-summary {
   border: 1px solid var(--border);
   border-radius: 10px;

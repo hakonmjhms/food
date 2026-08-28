@@ -116,3 +116,29 @@ def test_actual_cake_vote_is_one_per_voter_per_week(db):
     assert len(reports) == 1
     assert reports[0].cake_id == cake_b.id
 
+
+def test_cake_overview_tracks_predictions_and_last_served_date(db):
+    cake_a = Cake(name="Chocolate")
+    cake_b = Cake(name="Vanilla")
+    db.add_all([cake_a, cake_b])
+    db.commit()
+    week = _make_week(db, dt.date(2026, 2, 5))
+
+    crud.cast_vote(db, week, "voter-1", cake_a.id)
+    crud.cast_vote(db, week, "voter-2", cake_a.id)
+    crud.cast_vote(db, week, "voter-3", cake_b.id)
+    crud.set_actual_cake(db, week, cake_a.id)
+
+    overview = stats.cake_overview(db)
+    by_name = {c["name"]: c for c in overview}
+
+    assert by_name["Chocolate"]["times_predicted"] == 2
+    assert by_name["Chocolate"]["times_served"] == 1
+    assert by_name["Chocolate"]["last_served_display"] == "5. febrúar 2026"
+    assert by_name["Vanilla"]["times_predicted"] == 1
+    assert by_name["Vanilla"]["times_served"] == 0
+    assert by_name["Vanilla"]["last_served_display"] is None
+    # Sorted by most predicted first.
+    assert overview[0]["name"] == "Chocolate"
+
+

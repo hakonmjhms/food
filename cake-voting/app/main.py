@@ -10,7 +10,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from .config import get_settings
 from .database import init_db
-from .routers import cakes, pages, votes
+from .routers import pages, votes
 
 BASE_DIR = Path(__file__).resolve().parent
 settings = get_settings()
@@ -34,7 +34,6 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 
 app.include_router(pages.router)
 app.include_router(votes.router)
-app.include_router(cakes.router)
 
 
 @app.exception_handler(FastAPIHTTPException)
