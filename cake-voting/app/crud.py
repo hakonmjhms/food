@@ -14,9 +14,12 @@ ACTUAL_CAKE_MIN_VOTES = 2
 DEFAULT_CAKE_NAMES = [
     "Súkkulaðikaka",
     "Gulrótarkaka",
+    "Sjónvarpskaka",
+    "Karamellukaka",
+    "Hjónabandssæla",
+    "Tiramisu",
     "Ostakaka",
-    "Marmarakaka",
-    "Vanillukaka",
+    "Annað"
 ]
 
 
