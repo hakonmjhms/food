@@ -3,6 +3,7 @@ import datetime as dt
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from .config import get_settings
 from .models import ActualCakeVote, Cake, Vote, Week
 
 # An actual-cake report needs at least this many votes, and a strict majority of
@@ -49,11 +50,12 @@ def ensure_default_cakes(db: Session) -> None:
 
 
 def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> Week:
-    """The upcoming/current week, auto-created for the next Thursday if none exists.
+    """The upcoming/current week, auto-created for the next configured weekday if none exists.
 
     There's no admin to schedule weeks, so the app creates them itself on demand.
     Prediction voting runs 7:00-11:15 on the day, and actual-cake reporting opens
-    at 11:35 (leaving a short gap after voting closes).
+    at 11:35 (leaving a short gap after voting closes). The weekday itself comes
+    from the VOTE_WEEKDAY setting (default: Thursday).
     """
     now = now or dt.datetime.utcnow()
     today = now.date()
@@ -61,8 +63,9 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
     if week is not None:
         return week
 
-    days_until_thursday = (3 - today.weekday()) % 7  # Thursday == 3
-    event_date = today + dt.timedelta(days=days_until_thursday)
+    target_weekday = get_settings().vote_python_weekday
+    days_until_target = (target_weekday - today.weekday()) % 7
+    event_date = today + dt.timedelta(days=days_until_target)
     try:
         return create_week(
             db,

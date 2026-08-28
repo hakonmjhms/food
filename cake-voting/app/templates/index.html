@@ -5,7 +5,7 @@
   {% if week %}
     <h1>{{ event_date_display }}</h1>
     {% if status == 'upcoming' %}
-      <p class="status status-closed">Spá opnar klukkan 7:00 á fimmtudagsmorgni.</p>
+      <p class="status status-closed">Spá opnar klukkan 7:00 á {{ vote_weekday_morning_phrase }}.</p>
     {% elif status == 'open' %}
       <p class="status status-open">Spá er opin! Henni lokar klukkan 11:15.</p>
     {% elif status == 'closed' %}

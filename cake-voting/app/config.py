@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +14,14 @@ class Settings(BaseSettings):
 
     # Database connection string (SQLite by default for local dev)
     database_url: str = "sqlite:///./cake_voting.db"
+
+    # Which weekday the vote runs on: 0=Sunday, 1=Monday, ..., 6=Saturday. Default is 4 (Thursday).
+    vote_weekday: int = Field(default=4, ge=0, le=6)
+
+    @property
+    def vote_python_weekday(self) -> int:
+        """`vote_weekday` (0=Sunday...6=Saturday) converted to Python's date.weekday() convention (0=Monday...6=Sunday)."""
+        return (self.vote_weekday + 6) % 7
 
 
 @lru_cache
