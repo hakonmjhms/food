@@ -61,7 +61,7 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
     settings = get_settings()
     week = db.scalar(select(Week).where(Week.event_date >= today).order_by(Week.event_date))
     if week is not None:
-        _sync_upcoming_week_times(db, week, now, settings)
+        _sync_week_times(db, week, settings)
         return week
 
     days_until_target = (settings.vote_python_weekday - today.weekday()) % 7
@@ -81,12 +81,10 @@ def get_or_create_current_week(db: Session, now: dt.datetime | None = None) -> W
         return db.scalar(select(Week).where(Week.event_date == event_date))
 
 
-def _sync_upcoming_week_times(db: Session, week: Week, now: dt.datetime, settings) -> None:
-    """Keep a week's not-yet-reached time boundaries in sync with the current
-    schedule settings. Each boundary is synced independently, based on whether
-    that specific boundary is still in the future - so e.g. changing the cutoff
-    time still takes effect while voting is already open, but a boundary that's
-    already passed is left alone rather than retroactively reshuffled."""
+def _sync_week_times(db: Session, week: Week, settings) -> None:
+    """Always keep a week's times in sync with the current schedule settings,
+    even ones already passed - this app is only used for testing so far, so
+    config changes should take effect immediately rather than being held back."""
     changed = False
     for attr, configured_time in (
         ("voting_opens_at", settings.vote_open_dt_time),
@@ -94,8 +92,6 @@ def _sync_upcoming_week_times(db: Session, week: Week, now: dt.datetime, setting
         ("actual_vote_opens_at", settings.actual_vote_open_dt_time),
         ("actual_vote_closes_at", settings.actual_vote_close_dt_time),
     ):
-        if now >= getattr(week, attr):
-            continue
         new_value = dt.datetime.combine(week.event_date, configured_time)
         if getattr(week, attr) != new_value:
             setattr(week, attr, new_value)
@@ -103,7 +99,6 @@ def _sync_upcoming_week_times(db: Session, week: Week, now: dt.datetime, setting
 
     if changed:
         db.commit()
-    db.commit()
 
 
 def get_week_history(db: Session, limit: int = 52, now: dt.datetime | None = None) -> list[Week]:

@@ -119,7 +119,7 @@ def test_actual_cake_vote_is_one_per_voter_per_week(db):
 
 
 class _FakeScheduleSettings:
-    """Minimal stand-in for Settings, exposing only what _sync_upcoming_week_times needs."""
+    """Minimal stand-in for Settings, exposing only what _sync_week_times needs."""
 
     def __init__(self, open_time: dt.time, cutoff_time: dt.time, actual_open: dt.time, actual_close: dt.time):
         self.vote_open_dt_time = open_time
@@ -128,7 +128,7 @@ class _FakeScheduleSettings:
         self.actual_vote_close_dt_time = actual_close
 
 
-def test_sync_upcoming_week_times_picks_up_new_schedule_settings(db):
+def test_sync_week_times_picks_up_new_schedule_settings(db):
     event_date = dt.date(2026, 2, 12)
     week = Week(
         event_date=event_date,
@@ -141,8 +141,7 @@ def test_sync_upcoming_week_times_picks_up_new_schedule_settings(db):
     db.commit()
 
     new_settings = _FakeScheduleSettings(dt.time(8, 0), dt.time(12, 0), dt.time(12, 15), dt.time(18, 0))
-    before_open = dt.datetime.combine(event_date, dt.time(6, 0))  # still before the (old) 7:00 open time
-    crud._sync_upcoming_week_times(db, week, before_open, new_settings)
+    crud._sync_week_times(db, week, new_settings)
 
     assert week.voting_opens_at == dt.datetime.combine(event_date, dt.time(8, 0))
     assert week.voting_closes_at == dt.datetime.combine(event_date, dt.time(12, 0))
@@ -150,7 +149,7 @@ def test_sync_upcoming_week_times_picks_up_new_schedule_settings(db):
     assert week.actual_vote_closes_at == dt.datetime.combine(event_date, dt.time(18, 0))
 
 
-def test_sync_upcoming_week_times_leaves_a_boundary_alone_once_it_has_passed(db):
+def test_sync_week_times_updates_boundaries_even_after_they_have_passed(db):
     event_date = dt.date(2026, 2, 19)
     week = Week(
         event_date=event_date,
@@ -162,13 +161,12 @@ def test_sync_upcoming_week_times_leaves_a_boundary_alone_once_it_has_passed(db)
     db.add(week)
     db.commit()
 
+    # Even though "now" would be well past every one of these boundaries, this
+    # is a test-only convenience, so all four still get updated regardless.
     new_settings = _FakeScheduleSettings(dt.time(8, 0), dt.time(12, 0), dt.time(12, 15), dt.time(18, 0))
-    after_open = dt.datetime.combine(event_date, dt.time(9, 0))  # voting is already open, but hasn't closed yet
-    crud._sync_upcoming_week_times(db, week, after_open, new_settings)
+    crud._sync_week_times(db, week, new_settings)
 
-    # The open time already passed, so it's left alone...
-    assert week.voting_opens_at == dt.datetime.combine(event_date, dt.time(7, 0))
-    # ...but the cutoff and later boundaries haven't happened yet, so they still update.
+    assert week.voting_opens_at == dt.datetime.combine(event_date, dt.time(8, 0))
     assert week.voting_closes_at == dt.datetime.combine(event_date, dt.time(12, 0))
     assert week.actual_vote_opens_at == dt.datetime.combine(event_date, dt.time(12, 15))
     assert week.actual_vote_closes_at == dt.datetime.combine(event_date, dt.time(18, 0))
